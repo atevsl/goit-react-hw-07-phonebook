@@ -4,8 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   postContacts,
   selectContactList,
-  // selectError,
-  // selectIsLoading,
 } from 'redux/features/contactListSlice';
 import {
   FormStyled,
@@ -20,9 +18,6 @@ const ContactForm = () => {
   const [number, setNumber] = useState('');
   const dispatch = useDispatch();
   const contactList = useSelector(selectContactList);
-  // const isLoading = useSelector(selectIsLoading);
-  // const error = useSelector(selectError);
-
   const onNameChange = e => {
     setName(e.currentTarget.value);
   };
