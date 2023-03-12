@@ -27,12 +27,10 @@ const ContactList = () => {
   useEffect(() => {
     dispatch(fetchContactList());
   }, [dispatch]);
-  console.log('contactList', contactList);
 
   const filteredContacts = contactList?.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
-  console.log('filteredContacts', filteredContacts);
   return (
     <>
       {isLoading && <Loader />}
