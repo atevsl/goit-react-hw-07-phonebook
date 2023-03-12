@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import shortid from 'shortid';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact, getContactList } from 'redux/features/contactListSlice';
+import {
+  postContacts,
+  selectContactList,
+  // selectError,
+  // selectIsLoading,
+} from 'redux/features/contactListSlice';
 import {
   FormStyled,
   ButtonStyled,
@@ -14,7 +19,9 @@ const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const dispatch = useDispatch();
-  const contactList = useSelector(getContactList);
+  const contactList = useSelector(selectContactList);
+  // const isLoading = useSelector(selectIsLoading);
+  // const error = useSelector(selectError);
 
   const onNameChange = e => {
     setName(e.currentTarget.value);
@@ -38,7 +45,7 @@ const ContactForm = () => {
       alert(`number: ${number}, is already in contacts`);
       return;
     } else {
-      dispatch(addContact({ id: shortid.generate(), name, number }));
+      dispatch(postContacts({ id: shortid.generate(), name, number }));
     }
 
     setName('');

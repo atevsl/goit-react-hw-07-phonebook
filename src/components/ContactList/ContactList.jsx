@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   ListStyled,
   ListItemStyled,
@@ -8,40 +8,59 @@ import {
 } from './ContactList.styled';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  getContactList,
-  removeContact,
+  deleteContact,
+  fetchContactList,
+  selectContactList,
+  selectError,
+  selectIsLoading,
 } from '../../redux/features/contactListSlice';
-import { getFilter } from '../../redux/features/filterSlice';
+import { selectFilter } from '../../redux/features/filterSlice';
+import Loader from 'components/Loader/Loader';
 
 const ContactList = () => {
-  const contactList = useSelector(getContactList);
-  const filter = useSelector(getFilter);
   const dispatch = useDispatch();
+  const contactList = useSelector(selectContactList);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+  const filter = useSelector(selectFilter);
+
+  useEffect(() => {
+    dispatch(fetchContactList());
+  }, [dispatch]);
+  console.log('contactList', contactList);
 
   const filteredContacts = contactList?.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
-
+  console.log('filteredContacts', filteredContacts);
   return (
     <>
-      <ContactListHeader>Contacts:</ContactListHeader>
-      <ListStyled>
-        {filteredContacts.map(contact => {
-          return (
-            <ListItemStyled key={contact.id}>
-              <ContactTextStyled>
-                {contact.name}: {contact.number}
-              </ContactTextStyled>
-              <ContactListBtn
-                type="button"
-                onClick={() => dispatch(removeContact(contact.id))}
-              >
-                Delete
-              </ContactListBtn>
-            </ListItemStyled>
-          );
-        })}
-      </ListStyled>
+      {isLoading && <Loader />}
+      {error && 'Sorry, something wrong, please try to reload page.'}
+      {contactList.length > 0 && !isLoading && !error && (
+        <>
+          <ContactListHeader>Contacts:</ContactListHeader>
+          <ListStyled>
+            {filteredContacts.map(contact => {
+              return (
+                <ListItemStyled key={contact.id}>
+                  <ContactTextStyled>
+                    {contact.name}: {contact.number}
+                  </ContactTextStyled>
+                  <ContactListBtn
+                    type="button"
+                    onClick={() => dispatch(deleteContact(contact.id))}
+                  >
+                    Delete
+                  </ContactListBtn>
+                </ListItemStyled>
+              );
+            })}
+            {filteredContacts.length === 0 &&
+              'Sorry, there is no such contact...'}
+          </ListStyled>
+        </>
+      )}
     </>
   );
 };

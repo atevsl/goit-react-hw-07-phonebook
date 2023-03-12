@@ -1,35 +1,97 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+axios.defaults.baseURL = 'https://640b765265d3a01f981b8c76.mockapi.io/';
+
+export const fetchContactList = createAsyncThunk(
+  'contactList/fetchContactList',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`/contacts`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const postContacts = createAsyncThunk(
+  'contactList/postContacts',
+  async (newContact, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`/contacts`, newContact);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const deleteContact = createAsyncThunk(
+  'contactList/deleteContact',
+  async (contactId, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`/contacts/${contactId}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 export const contactListSlice = createSlice({
   name: 'contactList',
-  initialState: { contactList: [] },
-  reducers: {
-    addContact(state, action) {
-      state.contactList.push(action.payload);
+  initialState: { contactList: [], isLoading: false, error: null },
+  extraReducers: {
+    [fetchContactList.pending]: state => {
+      state.isLoading = true;
+    },
+    [fetchContactList.fulfilled]: (state, { payload }) => {
+      state.contactList = payload;
+      state.isLoading = false;
+      state.error = null;
     },
 
-    removeContact(state, action) {
-      return {
-        contactList: state.contactList.filter(
-          contact => contact.id !== action.payload
-        ),
-      };
+    [fetchContactList.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      state.error = payload;
+    },
+    [postContacts.pending]: state => {
+      state.isLoading = true;
+    },
+    [postContacts.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      state.error = null;
+      state.contactList.push(payload);
+    },
+
+    [postContacts.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      state.error = payload;
+    },
+    [deleteContact.pending]: state => {
+      state.isLoading = true;
+    },
+    [deleteContact.fulfilled]: (state, { payload }) => {
+      state.isLoading = false;
+      state.error = null;
+      const index = state.contactList.findIndex(
+        contact => contact.id === payload.id
+      );
+      state.contactList.splice(index, 1);
+    },
+
+    [deleteContact.rejected]: (state, { payload }) => {
+      state.isLoading = false;
+      state.error = payload;
     },
   },
 });
 
-const persistConfig = {
-  key: 'contactList',
-  storage,
-  whiteList: ['contactList'],
-};
+export const contactListSliceReducer = contactListSlice.reducer;
 
-export const persistedContactList = persistReducer(
-  persistConfig,
-  contactListSlice.reducer
-);
-
-export const { addContact, removeContact } = contactListSlice.actions;
-export const getContactList = state => state.contactList.contactList;
+// selectors:
+export const selectContactList = state => state.contactList.contactList;
+export const selectIsLoading = state => state.contactList.isLoading;
+export const selectError = state => state.contactList.error;

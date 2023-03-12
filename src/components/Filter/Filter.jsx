@@ -1,20 +1,23 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { setFilter } from '../../redux/features/filterSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectFilter, setFilter } from '../../redux/features/filterSlice';
 import { LabelStyled, InputStyled } from '../ContactForm/ContactForm.Styled';
 import { SpanStyled } from './Filter.styled';
 
 const Filter = () => {
   const dispath = useDispatch();
-
-  const filterHendler = e => {
-    dispath(setFilter(e.currentTarget.value));
-  };
+  const filter = useSelector(selectFilter);
 
   return (
     <LabelStyled>
       <SpanStyled>Find contacts by name:</SpanStyled>
-      <InputStyled name="filter" onChange={filterHendler}></InputStyled>
+      <InputStyled
+        name="filter"
+        value={filter}
+        onChange={e => {
+          dispath(setFilter(e.currentTarget.value));
+        }}
+      ></InputStyled>
     </LabelStyled>
   );
 };
