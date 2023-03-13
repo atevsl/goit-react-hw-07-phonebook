@@ -36,11 +36,11 @@ const ContactForm = () => {
     ) {
       alert(`name: ${name}, is already in contacts`);
       return;
-    } else if (contactList.some(contact => contact.number === number)) {
+    } else if (contactList.some(contact => contact.phone === number)) {
       alert(`number: ${number}, is already in contacts`);
       return;
     } else {
-      dispatch(postContacts({ id: shortid.generate(), name, number }));
+      dispatch(postContacts({ id: shortid.generate(), name, phone: number }));
     }
 
     setName('');
